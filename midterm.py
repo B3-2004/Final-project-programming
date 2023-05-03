@@ -1,5 +1,4 @@
 import tkinter
-import time
 
 root = tkinter.Tk()
 root.title("Game")
@@ -12,6 +11,8 @@ canvas.pack()
 # forest = 0, pathways = 1, player = 5, npc = 20, buildings = 10, entrances >= 100
 castle_entry = 0
 village_entry = 0
+house_entry = 0
+ruins_entry = 0
 
 
 # forest
@@ -130,7 +131,7 @@ def show2(x, y):
     forest[x][y] = 1
 
 def re_spawn(x, y):
-    global castle_entry, village_entry
+    global castle_entry, village_entry, house_entry, ruins_entry
     
     if castle_entry == 1:
         x, y = 28, 5
@@ -141,6 +142,16 @@ def re_spawn(x, y):
         x, y = 10, 6
         forest[x][y] = 5
         village_entry = 0
+    
+    if house_entry == 1:
+        x, y = 30, 17
+        forest[x][y] = 5
+        house_entry = 0
+    
+    if ruins_entry == 1:
+        x, y = 8, 17
+        forest[x][y] = 5
+        ruins_entry = 0
     
     return x, y
 
@@ -187,7 +198,7 @@ def move_right(event):
             x, y = x+1, y
 
 def check_entrance(x, y):
-    global castle_entry, village_entry
+    global castle_entry, village_entry, house_entry, ruins_entry
     print("Checking entrance at", x, y,', number:', forest[x][y])
     if forest[x][y] == 100:
         print("Entering building at", x, y)
@@ -199,6 +210,18 @@ def check_entrance(x, y):
         print("Entering building at", x, y)
         village_entry = 1 
         village_entrance()
+        bind_forest_keys()
+        return True
+    if forest[x][y] == 101:
+        print("Entering building at", x, y)
+        house_entry = 1 
+        house_entrance()
+        bind_forest_keys()
+        return True
+    if forest[x][y] == 102:
+        print("Entering building at", x, y)
+        ruins_entry = 1 
+        ruins_entrance()
         bind_forest_keys()
         return True
     return False
@@ -421,7 +444,220 @@ def village_entrance():
 #===============================================================================================================================================
 #===============================================================================================================================================
 
-# colors house: mistyrose2, mistyrose3
+def house_entrance():
+    global x, y
+    house_window = tkinter.Toplevel(root)
+    house_window.title("house")
+    h = 760
+    w = 1400
+    house = tkinter.Canvas(house_window, width=w, height=h, bg='white')
+    house.pack()
+    exited_house = False
+
+    house_grid = [[1 for i in range(int(h/40))] for j in range(int(w/40))]
+    for i in range(int(w / 40)):
+        for j in range(int(h / 40)):
+            house.create_rectangle(i*40, j*40, i*40+40, j*40+40, fill='mistyrose3')
+    
+    #character
+    x, y = 17, 16
+    house.create_rectangle(x*40, y*40, x*40+40, y*40+40, fill='grey10')
+    house_grid[x][y] = 5
+    
+    #exit
+    house.create_rectangle(17*40, 18*40, 17*40+40, 18*40+40, fill='red4')
+    house_grid[17][18] = 100
+    
+    def show_house(x, y):
+        house.create_rectangle(x * 40, y * 40, x * 40 + 40, y * 40 + 40, fill='grey10')
+        house_grid[x][y] = 5
+
+    def show2_house(x, y):
+        house.create_rectangle(x * 40, y * 40, x * 40 + 40, y * 40 + 40, fill='mistyrose2')
+        house_grid[x][y] = 1
+    
+    def check_exit_status():
+        if not exited_house:
+            house_window.after(100, check_exit_status)
+        else:
+            house_window.destroy()
+            bind_forest_keys()
+    
+    def exiting(x, y):
+        nonlocal exited_house
+        print("Checking exit at", x, y,', number:', house_grid[x][y])
+        if house_grid[x][y] == 100:
+            print("Exiting building at", x, y)
+            house.unbind_all('<Up>')
+            house.unbind_all('<Down>')
+            house.unbind_all('<Left>')
+            house.unbind_all('<Right>')
+            exited_house = True
+            return True
+        return False
+
+    def move_up_house(event):
+        global x, y
+        if house_grid[x][y] == 5:
+            if (house_grid[x][y-1] == 1 or house_grid[x][y-1] >= 100):
+                exited = exiting(x, y-1)
+                if exited: return
+                show_house(x, y-1)
+                show2_house(x, y)
+                x, y = x, y-1
+
+    def move_down_house(event):
+        global x, y
+        if house_grid[x][y] == 5:
+            if (house_grid[x][y+1] == 1 or house_grid[x][y+1] >= 100):
+                exited = exiting(x, y+1)
+                if exited: return
+                show_house(x, y+1)
+                show2_house(x, y)
+                x, y = x, y+1
+
+    def move_left_house(event):
+        global x, y
+        if house_grid[x][y] == 5:
+            if (house_grid[x-1][y] == 1 or house_grid[x-1][y] >= 100):
+                exited = exiting(x-1, y)
+                if exited: return
+                show_house(x-1, y)
+                show2_house(x, y)
+                x, y = x-1, y
+
+    def move_right_house(event):
+        global x, y
+        if house_grid[x][y] == 5:
+            if (house_grid[x+1][y] == 1 or house_grid[x+1][y] >= 100):
+                exited = exiting(x+1, y)
+                if exited: return
+                show_house(x+1, y)
+                show2_house(x, y)
+                x, y = x+1, y
+    
+
+    house.focus_set()
+    house.bind_all('<Up>', move_up_house)
+    house.bind_all('<Down>', move_down_house)
+    house.bind_all('<Left>', move_left_house)
+    house.bind_all('<Right>', move_right_house)
+        
+    check_exit_status()
+    house_window.mainloop()
+
+    return exited_house
+
+
+
+#===============================================================================================================================================
+#===============================================================================================================================================
+
+def ruins_entrance():
+    global x, y
+    ruins_window = tkinter.Toplevel(root)
+    ruins_window.title("ruins")
+    h = 760
+    w = 1400
+    ruins = tkinter.Canvas(ruins_window, width=w, height=h, bg='white')
+    ruins.pack()
+    exited_ruins = False
+
+    ruins_grid = [[1 for i in range(int(h/40))] for j in range(int(w/40))]
+    for i in range(int(w / 40)):
+        for j in range(int(h / 40)):
+            ruins.create_rectangle(i*40, j*40, i*40+40, j*40+40, fill='dark olive green')
+    
+    #character
+    x, y = 17, 16
+    ruins.create_rectangle(x*40, y*40, x*40+40, y*40+40, fill='grey10')
+    ruins_grid[x][y] = 5
+    
+    #exit
+    ruins.create_rectangle(17*40, 18*40, 17*40+40, 18*40+40, fill='red4')
+    ruins_grid[17][18] = 100
+    
+    def show_ruins(x, y):
+        ruins.create_rectangle(x * 40, y * 40, x * 40 + 40, y * 40 + 40, fill='grey10')
+        ruins_grid[x][y] = 5
+
+    def show2_ruins(x, y):
+        ruins.create_rectangle(x * 40, y * 40, x * 40 + 40, y * 40 + 40, fill='darkolivegreen4')
+        ruins_grid[x][y] = 1
+    
+    def check_exit_status():
+        if not exited_ruins:
+            ruins_window.after(100, check_exit_status)
+        else:
+            ruins_window.destroy()
+            bind_forest_keys()
+    
+    def exiting(x, y):
+        nonlocal exited_ruins
+        print("Checking exit at", x, y,', number:', ruins_grid[x][y])
+        if ruins_grid[x][y] == 100:
+            print("Exiting building at", x, y)
+            ruins.unbind_all('<Up>')
+            ruins.unbind_all('<Down>')
+            ruins.unbind_all('<Left>')
+            ruins.unbind_all('<Right>')
+            exited_ruins = True
+            return True
+        return False
+
+    def move_up_ruins(event):
+        global x, y
+        if ruins_grid[x][y] == 5:
+            if (ruins_grid[x][y-1] == 1 or ruins_grid[x][y-1] >= 100):
+                exited = exiting(x, y-1)
+                if exited: return
+                show_ruins(x, y-1)
+                show2_ruins(x, y)
+                x, y = x, y-1
+
+    def move_down_ruins(event):
+        global x, y
+        if ruins_grid[x][y] == 5:
+            if (ruins_grid[x][y+1] == 1 or ruins_grid[x][y+1] >= 100):
+                exited = exiting(x, y+1)
+                if exited: return
+                show_ruins(x, y+1)
+                show2_ruins(x, y)
+                x, y = x, y+1
+
+    def move_left_ruins(event):
+        global x, y
+        if ruins_grid[x][y] == 5:
+            if (ruins_grid[x-1][y] == 1 or ruins_grid[x-1][y] >= 100):
+                exited = exiting(x-1, y)
+                if exited: return
+                show_ruins(x-1, y)
+                show2_ruins(x, y)
+                x, y = x-1, y
+
+    def move_right_ruins(event):
+        global x, y
+        if ruins_grid[x][y] == 5:
+            if (ruins_grid[x+1][y] == 1 or ruins_grid[x+1][y] >= 100):
+                exited = exiting(x+1, y)
+                if exited: return
+                show_ruins(x+1, y)
+                show2_ruins(x, y)
+                x, y = x+1, y
+    
+
+    ruins.focus_set()
+    ruins.bind_all('<Up>', move_up_ruins)
+    ruins.bind_all('<Down>', move_down_ruins)
+    ruins.bind_all('<Left>', move_left_ruins)
+    ruins.bind_all('<Right>', move_right_ruins)
+        
+    check_exit_status()
+    ruins_window.mainloop()
+
+    return exited_ruins
+
+
 
 #===============================================================================================================================================
 #===============================================================================================================================================
