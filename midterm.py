@@ -124,35 +124,47 @@ canvas.create_rectangle(x*40, y*40, x*40+40, y*40+40, fill='grey10')
 forest[x][y] = 5
 
 def close_bubble():
+    global b_instructions, bt_instructions, bt2_instructions, bt3_instructions
     canvas.delete(b)
     canvas.delete(bt)
     canvas.delete(bt2)
     canvas.delete(bt3)
-    canvas.delete(ok_button)
-    canvas.delete(instructions_button)
+    
+    canvas.delete(b_instructions)
+    canvas.delete(bt_instructions)
+    canvas.delete(bt2_instructions)
+    canvas.delete(bt3_instructions)
+    
+    canvas.delete('ok_button') 
+    canvas.delete('instructions_button') 
 
 def instructions():
+    global b_instructions, bt_instructions, bt2_instructions, bt3_instructions
     def close_instructions():
         canvas.delete(b_instructions)
         canvas.delete(bt_instructions)
-        canvas.delete(close_button)
 
     b_instructions = canvas.create_rectangle(500, 230, 900, 530, fill="white")
     bt_instructions = canvas.create_text(700, 280, text="Arrow keys to move", font=("Arial", 30), fill="black", justify="center")
-    bt2_instructions = canvas.create_text(700, 350, text="And Space to interact:", font=("Arial", 20), width=400, fill="black", justify="center")
-    bt3_instructions = canvas.create_text(700, 420, text="Talk with People, Cut, Dig, Open and search", font=("Arial", 20), width=200, fill="black", justify="center")
-    close_button = Button(root, text="Close", command=close_instructions)
-    close_button.place(x=700, y=480)
-    
+    bt2_instructions = canvas.create_text(700, 350, text="Space to interact, Talk with People, Cut, Dig, Open and search", font=("Arial", 20), width=300, fill="black", justify="center")
+    bt3_instructions = canvas.create_text(700, 420, text="Press M, to show your acquired money", font=("Arial", 20), width=300, fill="black", justify="center")
+ 
+b_instructions, bt_instructions, bt2_instructions, bt3_instructions = 0,0,0,0 
 b = canvas.create_rectangle(500, 230, 900, 530, fill="white")
 bt = canvas.create_text(700, 280, text="The Enchanting Forest", font=("Arial", 30), fill="black", justify="center")
 bt2 = canvas.create_text(700, 350, text="The goal of the game is to enter the pink house", font=("Arial", 20), width=400, fill="black", justify="center")
 bt3 = canvas.create_text(700, 420, text="Do what you must. Good luck!", font=("Arial", 20), width=200, fill="black", justify="center")
 ok_button = Button(root, text="OK", command=close_bubble)
-ok_button.place(x=600, y=480)
+ok_button_id = canvas.create_window(650, 480, window=ok_button, tags='ok_button')
 instructions_button = Button(root, text="Instructions", command=instructions)
-instructions_button.place(x=750, y=480)
+instructions_button_id = canvas.create_window(750, 480, window=instructions_button, tags='instructions_button')
 
+def money_f(event):
+    global money
+    m = canvas.create_rectangle(10, 10, 80, 50, fill="white")
+    mt = canvas.create_text(45, 30, text=f"{money}$", font=("Arial", 20), fill="black")
+    root.after(1500, lambda: canvas.delete(m))
+    root.after(1500, lambda: canvas.delete(mt))
 
 #the blinking, interaction with surroundings(space bar) - NPC
 def interacting(event):
@@ -371,6 +383,13 @@ def castle_entrance():
     castle_window.after(1500, lambda: castle.delete(b))
     castle_window.after(1500, lambda: castle.delete(bt))
     
+    def money_f(event):
+        global money
+        m = castle.create_rectangle(10, 10, 80, 50, fill="white")
+        mt = castle.create_text(45, 30, text=f"{money}$", font=("Arial", 20), fill="black")
+        castle_window.after(1500, lambda: castle.delete(m))
+        castle_window.after(1500, lambda: castle.delete(mt))
+    
     def NPC_text(text, x, y, bubble_width, bubble_height, bubble_padding, time):
         b = castle.create_rectangle(x, y, x + bubble_width, y + bubble_height, fill="white", outline="")
         text_x = x + bubble_padding
@@ -470,6 +489,7 @@ def castle_entrance():
     castle.bind_all('<Left>', move_left_castle)
     castle.bind_all('<Right>', move_right_castle)
     castle.bind_all('<space>', interacting)
+    castle.bind_all('<m>', money_f)
         
     castle_window.mainloop()
 
@@ -552,6 +572,12 @@ def village_entrance():
     village_window.after(1500, lambda: village.delete(b))
     village_window.after(1500, lambda: village.delete(bt))
     
+    def money_f(event):
+        global money
+        m = village.create_rectangle(10, 10, 80, 50, fill="white")
+        mt = village.create_text(45, 30, text=f"{money}$", font=("Arial", 20), fill="black")
+        village_window.after(1500, lambda: village.delete(m))
+        village_window.after(1500, lambda: village.delete(mt))
     
     def show_village(x, y):
         village.create_rectangle(x * 40, y * 40, x * 40 + 40, y * 40 + 40, fill='grey10')
@@ -679,6 +705,7 @@ def village_entrance():
     village.bind_all('<Left>', move_left_village)
     village.bind_all('<Right>', move_right_village)
     village.bind_all('<space>', interacting)
+    village.bind_all('<m>', money_f)
         
     village_window.mainloop()
 
@@ -708,6 +735,12 @@ def house_entrance():
     house_window.after(1500, lambda: house.delete(b))
     house_window.after(1500, lambda: house.delete(bt))
     
+    def money_f(event):
+        global money
+        m = house.create_rectangle(10, 10, 80, 50, fill="white")
+        mt = house.create_text(45, 30, text=f"{money}$", font=("Arial", 20), fill="black")
+        house_window.after(1500, lambda: house.delete(m))
+        house_window.after(1500, lambda: house.delete(mt))
     
     #character
     x, y = 17, 16
@@ -820,6 +853,7 @@ def house_entrance():
     house.bind_all('<Left>', move_left_house)
     house.bind_all('<Right>', move_right_house)
     house.bind_all('<space>', interacting)
+    house.bind_all('<m>', money_f)
         
     house_window.mainloop()
 
@@ -829,7 +863,7 @@ def house_entrance():
 #===============================================================================================================================================
 
 def ruins_entrance():
-    global x, y, shovel, key
+    global x, y, shovel, key, money
     ruins_window = tkinter.Tk()
     ruins_window.title("ruins")
     h = 760
@@ -880,6 +914,13 @@ def ruins_entrance():
     ruins.create_rectangle(17*40, 18*40, 17*40+40, 18*40+40, fill='red4')
     ruins_grid[17][18] = 100
     
+    def money_f(event):
+        global money
+        m = ruins.create_rectangle(10, 10, 80, 50, fill="white")
+        mt = ruins.create_text(45, 30, text=f"{money}$", font=("Arial", 20), fill="black")
+        ruins_window.after(1500, lambda: ruins.delete(m))
+        ruins_window.after(1500, lambda: ruins.delete(mt))
+        
     def NPC_text(text, x, y, bubble_width, bubble_height, bubble_padding, time):
         b = ruins.create_rectangle(x, y, x + bubble_width, y + bubble_height, fill="white", outline="")
         text_x = x + bubble_padding
@@ -1005,6 +1046,7 @@ def ruins_entrance():
     ruins.bind_all('<Right>', move_right_ruins)
     ruins.bind_all('<space>', interacting)
     ruins.bind_all('<y>', key_acquisition)
+    ruins.bind_all('<m>', money_f)
 
     ruins_window.mainloop()
 
@@ -1013,7 +1055,7 @@ def ruins_entrance():
 #===============================================================================================================================================
 
 def deepforest_entrance():
-    global x, y, axe, shovel
+    global x, y, axe, shovel, money
     deepforest_window = tkinter.Toplevel(root)
     deepforest_window.title("deepforest")
     h = 760
@@ -1048,6 +1090,12 @@ def deepforest_entrance():
     deepforest_window.after(2500, lambda: deepforest.delete(b))
     deepforest_window.after(2500, lambda: deepforest.delete(bt))
     
+    def money_f(event):
+        global money
+        m = deepforest.create_rectangle(10, 10, 80, 50, fill="white")
+        mt = deepforest.create_text(45, 30, text=f"{money}$", font=("Arial", 20), fill="black")
+        deepforest_window.after(1500, lambda: deepforest.delete(m))
+        deepforest_window.after(1500, lambda: deepforest.delete(mt))
     
     def show_deepforest(x, y):
         deepforest.create_rectangle(x * 40, y * 40, x * 40 + 40, y * 40 + 40, fill='grey10')
@@ -1155,6 +1203,7 @@ def deepforest_entrance():
     deepforest.bind_all('<Right>', move_right_deepforest)
     deepforest.bind_all('<space>', interacting)
     deepforest.bind_all('<p>', shovel_acquisition)
+    deepforest.bind_all('<m>', money_f)
         
     deepforest_window.mainloop()
 
@@ -1171,3 +1220,4 @@ def quit_game(event):
 
 bind_forest_keys()
 canvas.bind('<Escape>', quit_game)
+canvas.bind('<m>', money_f)
